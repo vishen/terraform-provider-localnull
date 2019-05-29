@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"os/exec"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -59,6 +60,7 @@ func handleCommand(d *schema.ResourceData) error {
 	cmd := exec.Command(shell, "-c", command)
 	var out bytes.Buffer
 	cmd.Stdout = &out
+	cmd.Stderr = &out
 	if err := cmd.Run(); err != nil {
 		return err
 	}
@@ -86,7 +88,7 @@ func interpolatedCommand(d *schema.ResourceData) (string, error) {
 		return "", err
 	}
 	log.Printf("[DEBUG] GET %q + %v == %q\n", command, configuration, buf.String())
-	return buf.String(), nil
+	return strings.Replace(strings.TrimSpace(buf.String()), "\n", " "), nil
 }
 
 func resourceServerRead(d *schema.ResourceData, m interface{}) error {
